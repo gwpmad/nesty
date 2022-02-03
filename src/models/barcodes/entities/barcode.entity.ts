@@ -1,17 +1,11 @@
 import { Card } from 'src/models/cards/entities/card.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Barcode {
-  @PrimaryGeneratedColumn()
-  id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id?: string;
 
   @Column()
-  numbers: number;
-
-  @Column()
-  sender: string;
-
-  @OneToOne(() => Card, (card) => card.barcodeId)
-  cardId: string;
+  number: number;
 }

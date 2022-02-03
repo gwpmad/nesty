@@ -8,7 +8,10 @@ import {
   Delete,
   UsePipes,
   ValidationPipe,
+  Req,
 } from '@nestjs/common';
+import { ForbiddenException } from '@nestjs/common/exceptions';
+import { Request } from 'express';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -19,8 +22,12 @@ export class CardsController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  create(@Body() createCardDto: CreateCardDto) {
-    return this.cardsService.create(createCardDto);
+  create(@Body() createCardDto: CreateCardDto, @Req() request: Request) {
+    const { userId } = request.cookies;
+    if (!userId) {
+      throw new ForbiddenException();
+    }
+    return this.cardsService.create(createCardDto, userId);
   }
 
   @Get()

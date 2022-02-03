@@ -1,39 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
+import { QueryRunnerService } from 'src/database/query-runner.service';
+import { BarcodesService } from '../barcodes/barcodes.service';
 
 @Injectable()
 export class CardsService {
   constructor(
     @InjectRepository(Card)
     private cardsRepository: Repository<Card>,
-    private connection: Connection,
+    private queryRunnerService: QueryRunnerService,
+    private barcodesService: BarcodesService,
   ) {}
 
-  create(createCardDto: CreateCardDto) {
-    return this.cardsRepository.insert;
-  }
-
-  async _createMany(cards: Card[]) {
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      await queryRunner.manager.save(cards[0]);
-      await queryRunner.manager.save(cards[1]);
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-    } finally {
-      // you need to release a queryRunner which was manually instantiated
-      await queryRunner.release();
-    }
+  async create(createCardDto: CreateCardDto, userId: string): Promise<Card> {
+    return this.queryRunnerService.withTransaction<Card>( // do in controller
+      async (queryRunner: QueryRunner) => {
+        const barcode = await this.barcodesService.create();
+        const card = plainToInstance(Card, {
+          message: createCardDto.message,
+          barcodeId: barcode.id,
+          isOpened: false,
+          sender: userId,
+        });
+        return queryRunner.manager.save(card);
+      },
+    );
   }
 
   findAll(): Promise<Card[]> {

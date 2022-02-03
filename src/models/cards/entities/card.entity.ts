@@ -1,9 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Barcode } from 'src/models/barcodes/entities/barcode.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity()
 export class Card {
-  @PrimaryGeneratedColumn()
-  id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id?: string;
 
   @Column()
   message: string;
@@ -11,7 +18,8 @@ export class Card {
   @Column()
   sender: string;
 
-  @Column()
+  @OneToOne(() => Barcode)
+  @JoinColumn()
   barcodeId: string;
 
   @Column({ default: true })

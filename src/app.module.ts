@@ -6,9 +6,7 @@ import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { Card } from './models/cards/entities/card.entity';
 import { BarcodesModule } from './models/barcodes/barcodes.module';
-import { Barcode } from './models/barcodes/entities/barcode.entity';
 
 @Module({
   imports: [
