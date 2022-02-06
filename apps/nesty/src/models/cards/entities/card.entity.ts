@@ -1,4 +1,4 @@
-import { Barcode } from 'src/models/barcodes/entities/barcode.entity';
+import { Barcode } from '../../barcodes/entities/barcode.entity';
 import {
   Entity,
   Column,
@@ -18,10 +18,13 @@ export class Card {
   @Column()
   sender: string;
 
-  @OneToOne(() => Barcode)
-  @JoinColumn()
-  barcodeId: string;
-
   @Column({ default: true })
   isOpened: boolean;
+
+  @Column({ name: 'barcode_id' })
+  barcodeId: string;
+
+  @OneToOne(() => Barcode)
+  @JoinColumn({ name: 'barcode_id' })
+  barcode: Barcode;
 }

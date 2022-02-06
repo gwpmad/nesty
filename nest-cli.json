@@ -1,4 +1,30 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "apps/nesty/src",
+  "monorepo": true,
+  "root": "apps/nesty",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/nesty/tsconfig.app.json"
+  },
+  "projects": {
+    "nesty": {
+      "type": "application",
+      "root": "apps/nesty",
+      "entryFile": "main",
+      "sourceRoot": "apps/nesty/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/nesty/tsconfig.app.json"
+      }
+    },
+    "kafka-consumer": {
+      "type": "application",
+      "root": "apps/kafka-consumer",
+      "entryFile": "main",
+      "sourceRoot": "apps/kafka-consumer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/kafka-consumer/tsconfig.app.json"
+      }
+    }
+  }
 }

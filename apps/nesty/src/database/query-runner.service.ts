@@ -5,7 +5,7 @@ import { Connection, QueryRunner } from 'typeorm';
 export class QueryRunnerService {
   constructor(private connection: Connection) {}
 
-  private queryRunner: QueryRunner;
+  private queryRunner: QueryRunner = null;
   private stack = 0;
 
   public async withTransaction<EntityType>(

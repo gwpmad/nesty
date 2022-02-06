@@ -1,24 +1,28 @@
 import {
   Controller,
-  Get,
   Post,
-  Body,
-  Patch,
   Param,
-  Delete,
+  Body,
   UsePipes,
   ValidationPipe,
   Req,
+  HttpCode,
+  Inject,
 } from '@nestjs/common';
 import { ForbiddenException } from '@nestjs/common/exceptions';
+import { ClientKafka } from '@nestjs/microservices';
 import { Request } from 'express';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
-import { UpdateCardDto } from './dto/update-card.dto';
+import { OpenRequestsParams } from './params/open-requests.params';
 
 @Controller('cards')
 export class CardsController {
-  constructor(private readonly cardsService: CardsService) {}
+  constructor(
+    private readonly cardsService: CardsService,
+    @Inject('KAFKA_CLIENT')
+    private readonly kafkaClient: ClientKafka,
+  ) {}
 
   @Post()
   @UsePipes(ValidationPipe)
@@ -30,23 +34,14 @@ export class CardsController {
     return this.cardsService.create(createCardDto, userId);
   }
 
-  @Get()
-  findAll() {
-    return this.cardsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cardsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto) {
-    return this.cardsService.update(+id, updateCardDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cardsService.remove(id);
+  @Post('openRequests/:cardId')
+  @HttpCode(204)
+  @UsePipes(ValidationPipe)
+  open(@Param() params: OpenRequestsParams, @Req() request: Request) {
+    const { userId } = request.cookies;
+    if (!userId) {
+      throw new ForbiddenException();
+    }
+    return this.cardsService.open(params.cardId);
   }
 }

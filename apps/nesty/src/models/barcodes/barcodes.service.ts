@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { QueryRunner } from 'typeorm';
-import { QueryRunnerService } from 'src/database/query-runner.service';
+import { QueryRunnerService } from '../../database/query-runner.service';
 import { Barcode } from './entities/barcode.entity';
 
 @Injectable()

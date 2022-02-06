@@ -1,12 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { CreateCardDto } from './dto/create-card.dto';
-import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
-import { QueryRunnerService } from 'src/database/query-runner.service';
 import { BarcodesService } from '../barcodes/barcodes.service';
+import { QueryRunnerService } from '../../database/query-runner.service';
 
 @Injectable()
 export class CardsService {
@@ -17,8 +16,8 @@ export class CardsService {
     private barcodesService: BarcodesService,
   ) {}
 
-  async create(createCardDto: CreateCardDto, userId: string): Promise<Card> {
-    return this.queryRunnerService.withTransaction<Card>( // do in controller
+  create(createCardDto: CreateCardDto, userId: string): Promise<Card> {
+    return this.queryRunnerService.withTransaction<Card>(
       async (queryRunner: QueryRunner) => {
         const barcode = await this.barcodesService.create();
         const card = plainToInstance(Card, {
@@ -27,24 +26,20 @@ export class CardsService {
           isOpened: false,
           sender: userId,
         });
+        console.log('card', card)
         return queryRunner.manager.save(card);
       },
     );
   }
 
-  findAll(): Promise<Card[]> {
-    return this.cardsRepository.find();
-  }
+  async open(cardId: string): Promise<void> {
+    const card = await this.cardsRepository.findOne({ id: cardId });
+    if (!card)
+      throw new NotFoundException(
+        { cardId },
+        'Card to open not found with supplied cardId',
+      );
 
-  findOne(id: number) {
-    return this.cardsRepository.findOne(id);
-  }
-
-  update(id: number, updateCardDto: UpdateCardDto) {
-    return `This action updates a #${id} card`;
-  }
-
-  async remove(id: string) {
-    await this.cardsRepository.delete(id);
+    await this.cardsRepository.update({ id: cardId }, { isOpened: true });
   }
 }

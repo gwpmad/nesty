@@ -7,6 +7,7 @@ import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { BarcodesModule } from './models/barcodes/barcodes.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -51,6 +52,20 @@ import { BarcodesModule } from './models/barcodes/barcodes.module';
       inject: [ConfigService],
     }),
     BarcodesModule,
+    ClientsModule.register([
+      {
+        name: 'KAFKA_CLIENT',
+        transport: Transport.KAFKA,
+        options: {
+          client: {
+            brokers: ['127.0.0.1:9092'],
+          },
+          consumer: {
+            groupId: '1',
+          },
+        },
+      },
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],

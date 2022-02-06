@@ -6,8 +6,8 @@ export default () => ({
     database: process.env.DB_DATABASE,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    synchronize: process.env.NODE_ENV === 'local',
-    migrationsRun: process.env.NODE_ENV !== 'local',
+    synchronize: ['local', 'test'].includes(process.env.NODE_ENV),
+    migrationsRun: ['local', 'test'].includes(process.env.NODE_ENV),
     autoLoadEntities: true,
   },
 });
