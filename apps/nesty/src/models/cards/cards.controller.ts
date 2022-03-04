@@ -14,6 +14,7 @@ import { ClientKafka } from '@nestjs/microservices';
 import { Request } from 'express';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
+import { Card } from './entities/card.entity';
 import { OpenRequestsParams } from './params/open-requests.params';
 
 @Controller('cards')
@@ -26,12 +27,13 @@ export class CardsController {
 
   @Post()
   @UsePipes(ValidationPipe)
-  create(@Body() createCardDto: CreateCardDto, @Req() request: Request) {
+  async create(@Body() createCardDto: CreateCardDto, @Req() request: Request) {
     const { userId } = request.cookies;
     if (!userId) {
       throw new ForbiddenException();
     }
-    return this.cardsService.create(createCardDto, userId);
+    const createResult = await this.cardsService.create(createCardDto, userId);
+    this.kafkaClient.emit<Card>('cardCreated', createResult);
   }
 
   @Post('openRequests/:cardId')
